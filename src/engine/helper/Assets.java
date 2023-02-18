@@ -28,22 +28,27 @@ public class Assets {
     final static String img = curDir + "/img/";
 
     public static void init(GraphicsConfiguration gc) {
+        System.out.println("Using default img dir!");
+        init(gc, img);
+    }
+
+    public static void init(GraphicsConfiguration gc, String imageDir) {
+        System.out.println("Using img directory: " + imageDir);
         try {
-            mario = cutImage(gc, "mariosheet.png", 32, 32);
-            smallMario = cutImage(gc, "smallmariosheet.png", 16, 16);
-            fireMario = cutImage(gc, "firemariosheet.png", 32, 32);
-            enemies = cutImage(gc, "enemysheet.png", 16, 32);
-            items = cutImage(gc, "itemsheet.png", 16, 16);
-            level = cutImage(gc, "mapsheet.png", 16, 16);
-            particles = cutImage(gc, "particlesheet.png", 16, 16);
-            font = cutImage(gc, "font.gif", 8, 8);
+            mario = cutImage(gc, "mariosheet.png", 32, 32, imageDir);
+            smallMario = cutImage(gc, "smallmariosheet.png", 16, 16, imageDir);
+            fireMario = cutImage(gc, "firemariosheet.png", 32, 32, imageDir);
+            enemies = cutImage(gc, "enemysheet.png", 16, 32, imageDir);
+            items = cutImage(gc, "itemsheet.png", 16, 16, imageDir);
+            level = cutImage(gc, "mapsheet.png", 16, 16, imageDir);
+            particles = cutImage(gc, "particlesheet.png", 16, 16,imageDir);
+            font = cutImage(gc, "font.gif", 8, 8, imageDir);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    private static Image getImage(GraphicsConfiguration gc, String imageName) throws IOException {
+    private static Image getImage(GraphicsConfiguration gc, String imageName, String imageDir) throws IOException {
         BufferedImage source = null;
         try {
             source = ImageIO.read(Assets.class.getResourceAsStream(imageName));
@@ -51,7 +56,7 @@ public class Assets {
         }
 
         if (source == null) {
-            imageName = img + imageName;
+            imageName = imageDir + imageName;
             File file = new File(imageName);
             source = ImageIO.read(file);
         }
@@ -71,8 +76,8 @@ public class Assets {
         return image;
     }
 
-    private static Image[][] cutImage(GraphicsConfiguration gc, String imageName, int xSize, int ySize) throws IOException {
-        Image source = getImage(gc, imageName);
+    private static Image[][] cutImage(GraphicsConfiguration gc, String imageName, int xSize, int ySize, String imageDir) throws IOException {
+        Image source = getImage(gc, imageName, imageDir);
         Image[][] images = new Image[source.getWidth(null) / xSize][source.getHeight(null) / ySize];
         for (int x = 0; x < source.getWidth(null) / xSize; x++) {
             for (int y = 0; y < source.getHeight(null) / ySize; y++) {

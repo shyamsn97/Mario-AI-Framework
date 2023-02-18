@@ -40,6 +40,11 @@ public class MarioRender extends JComponent implements FocusListener {
         Assets.init(graphicsConfiguration);
     }
 
+   public void init(String imageDir) {
+        graphicsConfiguration = getGraphicsConfiguration();
+        Assets.init(graphicsConfiguration, imageDir);
+    }
+
     public void renderWorld(MarioWorld world, Image image, Graphics g, Graphics og) {
         og.fillRect(0, 0, 256, 240);
         world.render(og);
