@@ -87,6 +87,64 @@ public class MarioGame {
         }
     }
 
+
+    public MarioResult playInteractive(Agent agent, String level, int timer, int lives) {
+
+        this.window = new JFrame("Mario AI Framework");
+        this.render = new MarioRender(2);
+        this.window.setContentPane(this.render);
+        this.window.pack();
+        this.window.setResizable(false);
+        this.window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.render.init();
+        this.window.setVisible(true);
+
+        this.setAgent(agent);
+        MarioResult result = null;
+        for (int i = 0; i < lives; i++) {
+            world = new MarioWorld(this.killEvents, lives);
+            result = this.gameLoop(level, timer, 1, true, 30, lives, world);
+            if (!(result.getGameStatus() == GameStatus.WIN)) {
+                lives--;
+            }
+            else {
+                break;
+            }
+        }
+
+        this.window.dispose();
+        this.render = null;
+        this.world = null;
+        return result;
+    }
+
+
+    public MarioResult playAstar(agents.robinBaumgarten.Agent agent, String level, int timer, boolean render) {
+
+        if (render) {
+            this.window = new JFrame("Mario AI Framework");
+            this.render = new MarioRender(2);
+            this.window.setContentPane(this.render);
+            this.window.pack();
+            this.window.setResizable(false);
+            this.window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            this.render.init();
+            this.window.setVisible(true);
+        }
+
+        this.setAgent(agent);
+        MarioResult result = null;
+        world = new MarioWorld(this.killEvents, 1);
+        result = this.gameLoop(level, timer, 1, render, 30, 1, world);
+
+        if (render) {
+            this.window.dispose();
+            this.render = null;
+            this.world = null;
+        }
+        return result;
+    }
+
     /**
      * Play a certain mario level
      *
@@ -203,7 +261,7 @@ public class MarioGame {
      * @param scale      the screen scale, that scale value is multiplied by the actual width and height
      * @return statistics about the current game
      */
-    public MarioResult runGame(MarioAgent agent, String level, int timer, int marioState, boolean visuals, int fps, float scale) {
+    public MarioResult runGame(MarioAgent agent, String level, int timer, int marioState, boolean visuals, int fps, float scale, int lives) {
         if (visuals) {
             this.window = new JFrame("Mario AI Framework");
             this.render = new MarioRender(scale);
@@ -215,20 +273,43 @@ public class MarioGame {
             this.window.setVisible(true);
         }
         this.setAgent(agent);
-        return this.gameLoop(level, timer, marioState, visuals, fps);
+        MarioResult result = this.gameLoop(level, timer, marioState, visuals, fps, lives);
+        this.window.dispose();
+        this.render = null;
+        this.world = null;
+        return result;
+    }
+
+    public MarioResult runGame(MarioAgent agent, String level, int timer, int marioState, boolean visuals, int fps, float scale) {
+        return runGame(agent, level, timer, marioState, visuals, fps, scale, 1);
     }
 
     private MarioResult gameLoop(String level, int timer, int marioState, boolean visual, int fps) {
-        this.world = new MarioWorld(this.killEvents);
-        this.world.visuals = visual;
-        this.world.initializeLevel(level, 1000 * timer);
+        return gameLoop(level, timer, marioState, visual, fps, 1);
+    }
+
+    private MarioWorld initializeWorld(String level, int timer, int marioState, boolean visual, int fps, int lives, MarioWorld world) {
+        world.visuals = visual;
+        world.initializeLevel(level, 1000 * timer);
         if (visual) {
-            this.world.initializeVisuals(this.render.getGraphicsConfiguration());
+            world.initializeVisuals(this.render.getGraphicsConfiguration());
         }
-        this.world.mario.isLarge = marioState > 0;
-        this.world.mario.isFire = marioState > 1;
-        this.world.update(new boolean[MarioActions.numberOfActions()]);
+        world.mario.isLarge = marioState > 0;
+        world.mario.isFire = marioState > 1;
+        world.update(new boolean[MarioActions.numberOfActions()]);
+        return world;
+    }
+
+    private MarioResult gameLoop(String level, int timer, int marioState, boolean visual, int fps, int lives) {
+        world = new MarioWorld(this.killEvents, lives);
+        return gameLoop(level, timer, marioState, visual, fps, lives, world);
+    }
+
+    private MarioResult gameLoop(String level, int timer, int marioState, boolean visual, int fps, int lives, MarioWorld world) {
+
         long currentTime = System.currentTimeMillis();
+
+        this.world = initializeWorld(level, timer, marioState, visual, fps, lives, world);
 
         //initialize graphics
         VolatileImage renderTarget = null;

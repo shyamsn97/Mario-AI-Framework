@@ -31,9 +31,31 @@ public class PlayLevel {
         return content;
     }
 
+    public static void playLevel(MarioGame game, String levelPath) {
+        System.out.println("Running Interactive Play!");
+        System.out.println("=========================");
+        printResults(game.playInteractive(new agents.human.Agent(), getLevel(levelPath), 200, 999));
+    }
+
+    public static void playAstar(MarioGame game, String levelPath, boolean render) {
+        System.out.println("Running Astar agent with render: " + render);
+        System.out.println("===================================");
+        printResults(game.playAstar(new agents.robinBaumgarten.Agent(), getLevel(levelPath), 200, render));
+    }
+
     public static void main(String[] args) {
         MarioGame game = new MarioGame();
-        // printResults(game.playGame(getLevel("../levels/original/lvl-1.txt"), 200, 0));
-        printResults(game.runGame(new agents.robinBaumgarten.Agent(), getLevel("./levels/original/lvl-1.txt"), 20, 0, true));
+        String levelPath = args[0];
+        if (args.length == 1) {
+            playLevel(game, levelPath);
+        } else {
+            if (args[1].equals("astar")) {
+                boolean render = false;
+                if (args.length > 2 && args[2].equals("render")) {
+                    render = true;
+                }
+                playAstar(game, levelPath, render);
+            }
+        }
     }
 }
