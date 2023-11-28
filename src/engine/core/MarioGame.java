@@ -11,6 +11,8 @@ import agents.human.Agent;
 import engine.helper.GameStatus;
 import engine.helper.MarioActions;
 
+import java.awt.geom.Point2D;
+
 public class MarioGame {
     /**
      * the maximum time that agent takes for each step
@@ -205,6 +207,7 @@ public class MarioGame {
 
         ArrayList<MarioEvent> gameEvents = new ArrayList<>();
         ArrayList<MarioAgentEvent> agentEvents = new ArrayList<>();
+				ArrayList<Point2D> agentCoords = new ArrayList<Point2D>();
         while (this.world.gameStatus == GameStatus.RUNNING) {
             if (!this.pause) {
                 //get actions
@@ -216,6 +219,7 @@ public class MarioGame {
                                 + Math.abs(agentTimer.getRemainingTime()) + " msec.");
                     }
                 }
+								agentCoords.add(new Point2D.Double(this.world.mario.x, this.world.mario.y));
                 // update world
                 this.world.update(actions);
                 gameEvents.addAll(this.world.lastFrameEvents);
@@ -238,7 +242,7 @@ public class MarioGame {
                 }
             }
         }
-        return new MarioResult(this.world, gameEvents, agentEvents);
+				return new MarioResult(this.world, gameEvents, agentEvents, agentCoords);
     }
 
     // /**
