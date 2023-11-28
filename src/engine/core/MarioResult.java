@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import engine.helper.EventType;
 import engine.helper.GameStatus;
 import engine.helper.SpriteType;
+import java.awt.geom.Point2D;
 
 public class MarioResult {
     private MarioWorld world;
     private ArrayList<MarioEvent> gameEvents;
     private ArrayList<MarioAgentEvent> agentEvents;
+    public ArrayList<Point2D> agentCoords;
 
     /**
      * Create a mario result object
@@ -18,10 +20,11 @@ public class MarioResult {
      * @param gameEvents   the events that happens in the playthrough of the game
      * @param agentEvents  the events that happens in the playthrough of the game
      */
-    public MarioResult(MarioWorld world, ArrayList<MarioEvent> gameEvents, ArrayList<MarioAgentEvent> agentEvents) {
+    public MarioResult(MarioWorld world, ArrayList<MarioEvent> gameEvents, ArrayList<MarioAgentEvent> agentEvents,ArrayList<Point2D> agentCoords) {
         this.world = world;
         this.gameEvents = gameEvents;
         this.agentEvents = agentEvents;
+	this.agentCoords = agentCoords;
     }
 
     /**
