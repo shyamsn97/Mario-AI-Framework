@@ -20,10 +20,6 @@ public class MarioForwardModel {
     public static final int OBS_COIN = OBS_SCENE_SHIFT + 15;
     // Scene detail level 0
     public static final int OBS_PYRAMID_SOLID = OBS_SCENE_SHIFT + 2;
-    public static final int OBS_PIPE_BODY_RIGHT = OBS_SCENE_SHIFT + 21;
-    public static final int OBS_PIPE_BODY_LEFT = OBS_SCENE_SHIFT + 20;
-    public static final int OBS_PIPE_TOP_RIGHT = OBS_SCENE_SHIFT + 19;
-    public static final int OBS_PIPE_TOP_LEFT = OBS_SCENE_SHIFT + 18;
     public static final int OBS_USED_BLOCK = OBS_SCENE_SHIFT + 14;
     public static final int OBS_BULLET_BILL_BODY = OBS_SCENE_SHIFT + 5;
     public static final int OBS_BULLET_BILL_NECT = OBS_SCENE_SHIFT + 4;
@@ -36,7 +32,11 @@ public class MarioForwardModel {
     // Scene detail level 1
     public static final int OBS_PLATFORM = OBS_SCENE_SHIFT + 43;
     public static final int OBS_CANNON = OBS_SCENE_SHIFT + 3;
-    public static final int OBS_PIPE = OBS_SCENE_SHIFT + 18;
+    public static final int OBS_PIPE_BODY_RIGHT = OBS_SCENE_SHIFT + 21;
+    public static final int OBS_PIPE_BODY_LEFT = OBS_SCENE_SHIFT + 20;
+    public static final int OBS_PIPE_TOP_RIGHT = OBS_SCENE_SHIFT + 19;
+    public static final int OBS_PIPE_TOP_LEFT = OBS_SCENE_SHIFT + 18;
+
     // Scene detail level 2
     public static final int OBS_SCENE_OBJECT = OBS_SCENE_SHIFT + 84;
 
@@ -69,14 +69,14 @@ public class MarioForwardModel {
             case (0):
                 switch (sprite) {
                     case MARIO:
-                        return OBS_NONE;
+                        return 77;
                     default:
                         sprite.getValue();
                 }
             case (1):
                 switch (sprite) {
                     case MARIO:
-                        return OBS_NONE;
+                        return 77;
                     case FIREBALL:
                         return OBS_FIREBALL;
                     case MUSHROOM:
@@ -101,8 +101,9 @@ public class MarioForwardModel {
                 }
             case (2):
                 switch (sprite) {
-                    case FIREBALL:
                     case MARIO:
+                        return 77;
+                    case FIREBALL:
                     case MUSHROOM:
                     case LIFE_MUSHROOM:
                     case FIRE_FLOWER:
@@ -157,10 +158,13 @@ public class MarioForwardModel {
                         return OBS_CANNON;
                     // pipe blocks
                     case 18:
+                        return OBS_PIPE_TOP_LEFT;
                     case 19:
+                        return OBS_PIPE_TOP_RIGHT;
                     case 20:
+                        return OBS_PIPE_BODY_LEFT;
                     case 21:
-                        return OBS_PIPE;
+                        return OBS_PIPE_BODY_RIGHT;
                     // brick blocks
                     case 6:
                     case 7:

@@ -280,8 +280,6 @@ public class MarioWorld {
         }
 
         for (MarioSprite sprite : sprites) {
-            if (sprite.type == SpriteType.MARIO)
-                continue;
             if (sprite.getMapX() >= 0 &&
                     sprite.getMapX() > centerXInMap - MarioGame.tileWidth / 2 &&
                     sprite.getMapX() < centerXInMap + MarioGame.tileWidth / 2 &&

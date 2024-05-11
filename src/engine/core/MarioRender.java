@@ -40,7 +40,7 @@ public class MarioRender extends JComponent implements FocusListener {
         Assets.init(graphicsConfiguration);
     }
 
-   public void init(String imageDir) {
+    public void init(String imageDir) {
         graphicsConfiguration = getGraphicsConfiguration();
         Assets.init(graphicsConfiguration, imageDir);
     }

@@ -24,6 +24,33 @@ public class MarioResult {
         this.agentEvents = agentEvents;
     }
 
+    public String getCoordString() {
+        String s = "";
+        String coord = "";
+        float x;
+        float y;
+        for (int i = 0; i < this.agentEvents.size() - 1; i++) {
+            x = this.agentEvents.get(i).getX();
+            y = this.agentEvents.get(i).getY();
+            s += "(" + String.valueOf(x) + "," + String.valueOf(y) + ")";
+            s += ";";
+        }
+        x = this.agentEvents.get(this.agentEvents.size() - 1).getX();
+        y = this.agentEvents.get(this.agentEvents.size() - 1).getY();
+        s +=  "(" + String.valueOf(x) + "," + String.valueOf(y) + ")";
+        return s;
+    }
+
+    public String getActionString() {
+        String s = "";
+        for (int i = 0; i < this.agentEvents.size() - 1; i++) {
+            s += this.agentEvents.get(i).getActionString();
+            s += ";";
+        }
+        s += this.agentEvents.get(this.agentEvents.size() - 1).getActionString();
+        return s;
+    }
+
     /**
      * Get the current state of the running game
      *

@@ -39,7 +39,7 @@ public class PlayLevel {
     public static void playLevel(MarioGame game, String levelPath, String imgDir) {
         System.out.println("Running Interactive Play!");
         System.out.println("=========================");
-        printResults(game.playInteractive(new agents.human.Agent(), getLevel(levelPath), 200, 999, imgDir));
+        printResults(game.playInteractive(new agents.human.Agent(), getLevel(levelPath), 200, 999, imgDir, null));
     }
 
     public static void main(String[] args) {

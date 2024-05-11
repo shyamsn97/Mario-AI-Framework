@@ -3,6 +3,7 @@ package engine.core;
 import java.awt.image.VolatileImage;
 import java.util.ArrayList;
 import java.awt.*;
+import java.awt.image.*;
 import java.awt.event.KeyAdapter;
 
 import javax.swing.JFrame;
@@ -10,6 +11,9 @@ import javax.swing.JFrame;
 import agents.human.Agent;
 import engine.helper.GameStatus;
 import engine.helper.MarioActions;
+import java.io.*;
+import javax.imageio.*;
+
 
 public class MarioGame {
     /**
@@ -87,12 +91,24 @@ public class MarioGame {
         }
     }
 
+    private MarioWorld initializeWorld(String level, int timer, int marioState, boolean visual, int fps, int lives, MarioWorld world) {
+        world.visuals = visual;
+        world.initializeLevel(level, 1000 * timer);
+        if (visual) {
+            world.initializeVisuals(this.render.getGraphicsConfiguration());
+        }
+        world.mario.isLarge = marioState > 0;
+        world.mario.isFire = marioState > 1;
+        world.update(new boolean[MarioActions.numberOfActions()]);
+        return world;
+    }
+
     public MarioResult playInteractive(Agent agent, String level, int timer, int lives) {
-        return playInteractive(agent, level, timer, lives, null);
+        return playInteractive(agent, level, timer, lives, null, null);
     }
 
 
-    public MarioResult playInteractive(Agent agent, String level, int timer, int lives, String imageDir) {
+    public MarioResult playInteractive(Agent agent, String level, int timer, int lives, String imageDir, String outputPath) {
         this.window = new JFrame("Mario AI Framework");
         this.render = new MarioRender(2);
         this.window.setContentPane(this.render);
@@ -111,7 +127,7 @@ public class MarioGame {
         MarioWorld world;
         for (int i = 0; i < lives; i++) {
             world = new MarioWorld(this.killEvents, lives);
-            result = this.gameLoop(level, timer, 1, true, 30, lives, world);
+            result = this.gameLoop(level, timer, 1, true, 30, lives, world, outputPath);
             if (!(result.getGameStatus() == GameStatus.WIN)) {
                 lives--;
             }
@@ -127,10 +143,10 @@ public class MarioGame {
     }
 
     public MarioResult playAstar(agents.robinBaumgarten.Agent agent, String level, int timer, boolean render) {
-        return playAstar(agent, level, timer, render, null);
+        return playAstar(agent, level, timer, render, null, null);
     }
 
-    public MarioResult playAstar(agents.robinBaumgarten.Agent agent, String level, int timer, boolean render, String imageDir) {
+    public MarioResult playAstar(agents.robinBaumgarten.Agent agent, String level, int timer, boolean render, String imageDir, String outputPath) {
         if (render) {
             this.window = new JFrame("Mario AI Framework");
             this.render = new MarioRender(2);
@@ -149,7 +165,7 @@ public class MarioGame {
         this.setAgent(agent);
         MarioResult result = null;
         MarioWorld world = new MarioWorld(this.killEvents, 1);
-        result = this.gameLoop(level, timer, 1, render, 30, 1, world);
+        result = this.gameLoop(level, timer, 1, render, 30, 1, world, outputPath);
 
         if (render) {
             this.window.dispose();
@@ -161,33 +177,23 @@ public class MarioGame {
 
 
     private MarioResult gameLoop(String level, int timer, int marioState, boolean visual, int fps) {
-        return gameLoop(level, timer, marioState, visual, fps, 1);
+        return gameLoop(level, timer, marioState, visual, fps, 1, null);
     }
 
-    private MarioWorld initializeWorld(String level, int timer, int marioState, boolean visual, int fps, int lives, MarioWorld world) {
-        world.visuals = visual;
-        world.initializeLevel(level, 1000 * timer);
-        if (visual) {
-            world.initializeVisuals(this.render.getGraphicsConfiguration());
-        }
-        world.mario.isLarge = marioState > 0;
-        world.mario.isFire = marioState > 1;
-        world.update(new boolean[MarioActions.numberOfActions()]);
-        return world;
-    }
-
-    private MarioResult gameLoop(String level, int timer, int marioState, boolean visual, int fps, int lives) {
+    private MarioResult gameLoop(String level, int timer, int marioState, boolean visual, int fps, int lives, String outputPath) {
         world = new MarioWorld(this.killEvents, lives);
-        return gameLoop(level, timer, marioState, visual, fps, lives, world);
+        return gameLoop(level, timer, marioState, visual, fps, lives, world, outputPath);
     }
 
-    private MarioResult gameLoop(String level, int timer, int marioState, boolean visual, int fps, int lives, MarioWorld world) {
+    private MarioResult gameLoop(String level, int timer, int marioState, boolean visual, int fps, int lives, MarioWorld world, String outputPath) {
 
         long currentTime = System.currentTimeMillis();
 
         this.world = initializeWorld(level, timer, marioState, visual, fps, lives, world);
 
         //initialize graphics
+        int count = 0;
+        BufferedImage img;
         VolatileImage renderTarget = null;
         Graphics backBuffer = null;
         Graphics currentBuffer = null;
@@ -203,13 +209,25 @@ public class MarioGame {
         System.out.println(this.world);
         this.agent.initialize(new MarioForwardModel(this.world.clone()), agentTimer);
 
+        MarioForwardModel forwardModel;
         ArrayList<MarioEvent> gameEvents = new ArrayList<>();
         ArrayList<MarioAgentEvent> agentEvents = new ArrayList<>();
+        int[][] observations;
         while (this.world.gameStatus == GameStatus.RUNNING) {
             if (!this.pause) {
                 //get actions
+                forwardModel = new MarioForwardModel(this.world.clone());
                 agentTimer = new MarioTimer(MarioGame.maxTime);
-                boolean[] actions = this.agent.getActions(new MarioForwardModel(this.world.clone()), agentTimer);
+                observations = forwardModel.getScreenCompleteObservation(0,2);
+                // try {
+                //     // to sleep 10 seconds
+                //     Thread.sleep(2000);
+                // } catch (InterruptedException e) {
+                //     // recommended because catching InterruptedException clears interrupt flag
+                //     Thread.currentThread().interrupt();
+                //     // you probably want to quit if the thread is interrupted
+                // }
+                boolean[] actions = this.agent.getActions(forwardModel, agentTimer);
                 if (MarioGame.verbose) {
                     if (agentTimer.getRemainingTime() < 0 && Math.abs(agentTimer.getRemainingTime()) > MarioGame.graceTime) {
                         System.out.println("The Agent is slowing down the game by: "
@@ -221,12 +239,17 @@ public class MarioGame {
                 gameEvents.addAll(this.world.lastFrameEvents);
                 agentEvents.add(new MarioAgentEvent(actions, this.world.mario.x,
                         this.world.mario.y, (this.world.mario.isLarge ? 1 : 0) + (this.world.mario.isFire ? 1 : 0),
-                        this.world.mario.onGround, this.world.currentTick));
+                        this.world.mario.onGround, this.world.currentTick, observations));
             }
 
             //render world
             if (visual) {
                 this.render.renderWorld(this.world, renderTarget, backBuffer, currentBuffer);
+                if (outputPath != null && !outputPath.isEmpty()) {
+                    img = convertToBufferedImage(renderTarget);
+                    saveToPNG(img, outputPath + "/images/" + "img" + count + ".png");
+                }
+                count++;
             }
             //check if delay needed
             if (this.getDelay(fps) > 0) {
@@ -239,6 +262,24 @@ public class MarioGame {
             }
         }
         return new MarioResult(this.world, gameEvents, agentEvents);
+    }
+
+    private BufferedImage convertToBufferedImage(VolatileImage volatileImage) {
+        BufferedImage bufferedImage = new BufferedImage(volatileImage.getWidth(), volatileImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics g = bufferedImage.getGraphics();
+        g.drawImage(volatileImage, 0, 0, null);
+        g.dispose();
+        return bufferedImage;
+    }
+
+    private void saveToPNG(BufferedImage image, String filePath) {
+        try {
+            File file = new File(filePath);
+            ImageIO.write(image, "png", file);
+            System.out.println("Image saved to: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // /**
